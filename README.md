@@ -45,7 +45,7 @@ Elastic Stack 包括 Elasticsearch、Kibana、Beats 和 Logstash（也称为 ELK
 
 ```yml
 
-# 需要安装JDK的主机,ELK基于Java,所有主机均需要安装JDK1.7以上，这里使用JDK1.8。 
+# 需要安装JDK的主机,ELK基于Java,所有主机均需要安装JDK1.7以上，这里使用JDK1.8。
 [jdk_server]
 10.9.1.9[1:3]
 10.9.1.9[6:7]
