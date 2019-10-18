@@ -1,0 +1,117 @@
+---
+#
+# Install elasticsearch
+#
+- name: take off swap file
+  shell: "sudo swapoff -a"
+
+- name: stop elasticsearch
+  systemd:
+    name: elasticsearch.service
+    state: stopped
+
+- name: Uninstall elasticsearch
+  yum:
+    name: elasticsearch
+    state: absent
+
+- name: remove all elasticsearch file
+  shell: "find / -name '*elasticsearch*' | xargs rm -rf"
+
+
+- name: Install elasticsearch
+  yum:
+    name: elasticsearch
+    state: present
+
+- name: create new path
+  file:
+    path: "{{ item }}"
+    group: elasticsearch
+    owner: elasticsearch
+    mode: 0755
+    state: directory
+  loop:
+    - "{{ newlogpath }}"
+    - "{{ newlibpath }}"
+    - "{{ databackpath }}"
+
+- name: create certs path
+  file:
+    path: "{{ certpath }}"
+    group: elasticsearch
+    owner: root
+    mode: 0755
+    state: directory
+
+- name: delete old path
+  file:
+    path: "{{ item }}"
+    state: absent
+  loop:
+    - "{{ oldlogpath }}"
+    - "{{ oldlibpath }}"
+
+- name: link new path to old path
+  file:
+    src: "{{ item[0] }}"
+    path: "{{ item[1] }}"
+    state: link
+    owner: elasticsearch
+    group: elasticsearch
+    force: yes
+  loop:
+    - ["{{ newlogpath }}", "{{ oldlogpath }}"]
+    - ["{{ newlibpath }}", "{{ oldlibpath }}"]
+
+- name: create jvm.options with template
+  template:
+    src: jvm.options.j2
+    dest: "{{ packagepath }}/jvm.options"
+
+
+- name: create elasticsearch.yml with template
+  template:
+    src: elasticsearch.yml.j2
+    dest: "{{ packagepath }}/elasticsearch.yml"
+    owner: root
+    group: elasticsearch
+    mode: 0660
+    force: yes
+
+- name: copy ca files
+  copy:
+    src: "{{ ca_file }}"
+    dest: "{{ certpath }}/{{ ca_file }}"
+    owner: root
+    group: elasticsearch
+    mode: 0600
+  
+- name: copy cert files
+  copy:
+    src: "{{ cert_file }}"
+    dest: "{{ certpath }}/{{ cert_file }}"
+    owner: root
+    group: elasticsearch
+    mode: 0644
+
+- name: started elasticsearch
+  # systemd:
+  #   naem: elasticsearch.service
+  #   daemon_reload: yes
+  #   state: started
+  #  不知道什么原因，这个不能启动，换成shell可以正常启动
+
+  shell: "systemctl restart elasticsearch"
+
+- name: enable elasticsearch
+  systemd:
+    name: elasticsearch.service
+    enabled: yes
+
+
+
+
+
+
+

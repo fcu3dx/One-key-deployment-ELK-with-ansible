@@ -102,3 +102,4 @@ venv.bak/
 
 # mypy
 .mypy_cache/
+roles/jdk/files/jdk-8u221-linux-x64.rpm

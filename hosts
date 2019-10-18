@@ -1,0 +1,17 @@
+# 需要安装JDK的主机,ELK基于Java,所有主机均需要安装JDK1.7以上，这里使用JDK1.8。
+[jdk_server]
+10.9.1.9[1:3]
+10.9.1.9[6:7]
+
+# Elasticsearch 主机，包括IP和配置文件中的各项参数，比如 Nodename,network,内存大小等
+[es_servers]
+10.9.1.91 node_name=gxsk_es_01 node_master=true node_data=true network_host=10.9.1.91
+10.9.1.92 node_name=gxsk_es_02 node_master=true node_data=true network_host=10.9.1.92
+10.9.1.93 node_name=gxsk_es_03 node_master=true node_data=true network_host=10.9.1.93
+
+[ls_servers]
+10.9.1.96 node_name=gxsk_ls_01 network_host=10.9.1.96
+10.9.1.97 node_name=gxsk_ls_02 network_host=10.9.1.97
+
+[kibana_servers]
+10.9.1.97 node_name=gxsk_kibana_01 network_host=10.9.1.97

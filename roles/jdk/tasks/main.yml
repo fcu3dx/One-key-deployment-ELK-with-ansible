@@ -1,0 +1,10 @@
+- name: Yum instll jdk
+  yum:
+    name: jdk
+    state: present
+
+- name link jdk
+  file: 
+    src: /usr/java/default
+    dest: /opt/jdk
+    state: link

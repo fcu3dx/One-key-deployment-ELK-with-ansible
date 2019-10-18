@@ -1,0 +1,9 @@
+newlogpath:  /data/log/elasticsearch
+newlibpath:  /data/lib/elasticsearch
+oldlogpath:  /var/log/elasticsearch
+oldlibpath:  /var/lib/elasticsearch
+databackpath: /data/backup/elasticsearch
+packagepath:  /etc/elasticsearch
+certpath: "{{ packagepath }}/certs"
+ca_file: elastic-stack-ca.p12
+cert_file: elastic-certificates.p12
