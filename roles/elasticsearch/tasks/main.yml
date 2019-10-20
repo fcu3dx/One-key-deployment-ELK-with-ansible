@@ -95,6 +95,16 @@
     group: elasticsearch
     mode: 0644
 
+- name: copy jar files
+  copy:
+    src: "{{ x-pack-core-7.4.0.jar }}"
+    dest: /usr/share/elasticsearch/modules/x-pack-core/
+    owner: root
+    group: root
+    mode: 0644
+    force: yes
+    
+
 - name: started elasticsearch
   # systemd:
   #   naem: elasticsearch.service

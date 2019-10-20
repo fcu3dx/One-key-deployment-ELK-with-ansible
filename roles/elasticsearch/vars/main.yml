@@ -7,3 +7,4 @@ packagepath:  /etc/elasticsearch
 certpath: "{{ packagepath }}/certs"
 ca_file: elastic-stack-ca.p12
 cert_file: elastic-certificates.p12
+jar_name: x-pack-core-7.4.0.jar
