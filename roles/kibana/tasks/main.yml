@@ -1,0 +1,46 @@
+---
+#
+# Install kibana
+#
+- name: take off swap file
+  shell: "sudo swapoff -a"
+
+- name: stop kibana
+  systemd:
+    name: kibana.service
+    state: stopped
+
+- name: Uninstall kibana
+  yum:
+    name: kibana
+    state: absent
+
+- name: remove all kibana file
+  shell: "find / -name '*kibana*' | xargs rm -rf"
+
+
+- name: Install kibana
+  yum:
+    name: kibana
+    state: present
+
+- name: create kibana.yml with template
+  template:
+    src: kibana.yml.j2
+    dest: "{{ packagepath }}/kibana.yml"
+    owner: root
+    group: root
+    mode: 0644
+    force: yes
+
+- name: enable kibana
+  systemd:
+    name: kibana
+    enabled: yes
+    daemon_reload: yes
+
+- name: started kibana
+  # shell: "systemctl start kibana"
+  systemd:
+    name: kibana
+    state: started

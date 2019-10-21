@@ -1,0 +1,46 @@
+# - name: remove expect
+#   yum:
+#     name: expect
+#     state: absent
+
+- name: Install expect
+  yum:
+    name: expect
+    state: present
+
+- name: copy shell file
+  copy:
+    src: "{{ item }}"
+    dest: /root/
+    mode: 0755
+  loop:
+    - gerespass.sh
+    - license.json
+
+- name: create reg_license file with template
+  template:
+    src: reglicense.sh.j2
+    dest: /root/reglicense.sh
+    force: yes
+    mode: 0755
+
+- name: exec shell
+  shell: "/root/gerespass.sh"
+  
+- name:  import license curl
+  shell: "/root/reglicense.sh"
+
+
+# - name: delete file
+#   file:
+#     path: "/root/{{ item }}"
+#     state: absent
+#   loop:
+#     - gerespass.sh
+#     - license.json
+#     - reglicense.sh
+
+
+
+
+

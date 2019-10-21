@@ -68,7 +68,8 @@
   template:
     src: jvm.options.j2
     dest: "{{ packagepath }}/jvm.options"
-
+    force: yes
+    mode: 0660
 
 - name: create elasticsearch.yml with template
   template:
@@ -97,27 +98,29 @@
 
 - name: copy jar files
   copy:
-    src: "{{ x-pack-core-7.4.0.jar }}"
+    src: x-pack-core-7.4.0.jar
     dest: /usr/share/elasticsearch/modules/x-pack-core/
     owner: root
     group: root
     mode: 0644
     force: yes
-    
-
-- name: started elasticsearch
-  # systemd:
-  #   naem: elasticsearch.service
-  #   daemon_reload: yes
-  #   state: started
-  #  不知道什么原因，这个不能启动，换成shell可以正常启动
-
-  shell: "systemctl restart elasticsearch"
 
 - name: enable elasticsearch
   systemd:
-    name: elasticsearch.service
+    name: elasticsearch
     enabled: yes
+    daemon_reload: yes
+
+- name: started elasticsearch
+  # systemd:
+  #   naem: elasticsearch
+  #   state: started
+
+  shell: "systemctl start elasticsearch"
+
+
+
+
 
 
 
