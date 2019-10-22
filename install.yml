@@ -1,3 +1,25 @@
+- hosts: es_servers
+  tasks:
+    - name: stop elasticsearch
+      systemd:
+        name: elasticsearch.service
+        state: stopped
+
+- hosts: ls_servers
+  tasks:
+    - name: stop logstash
+      systemd:
+        name: logstash.service
+        state: stopped
+
+
+- hosts: kibana_servers
+  tasks:
+    - name: stop kibana
+      systemd:
+        name: kibana.service
+        state: stopped
+
 # - hosts: es_servers
 #   remote_user: root
 #   vars:
@@ -14,6 +36,14 @@
 #   roles:
 #     - esregist
 
+# - hosts: kibana_servers
+#   remote_user: root
+#   vars:
+#     - elasticsearch_hosts: '["http://10.9.1.91:9200", "http://10.9.1.92:9200", "http://10.9.1.93:9200"]'
+#   roles:
+#     - kibana
+
+
 # - hosts: ls_servers
 #   remote_user: root
 #   vars:
@@ -22,9 +52,3 @@
 #   roles:
 #     - logstash 
 
-- hosts: kibana_servers
-  remote_user: root
-  vars:
-    - elasticsearch_hosts: '["http://10.9.1.91:9200", "http://10.9.1.92:9200", "http://10.9.1.93:9200"]'
-  roles:
-    - kibana

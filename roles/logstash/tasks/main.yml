@@ -5,20 +5,36 @@
 - name: take off swap file
   shell: "sudo swapoff -a"
 
-- name: stop logstash
-  shell: "systemctl stop logstash"
+- name: rpm -ql logstash
+  shell: rpm -ql logstash | grep -v not | wc -l 
+  register: ls_installed
+- debug:
+    var: ls_installed
+
+- name: ps logstash
+  shell: ps -ef | grep logstash | grep -v grep | wc -l
+  register: ls_state
+
+- debug:
+    var: ls_state
+
+# - name: stop logstash
+#   # shell: "systemctl stop logstash"
 
 #   systemd:
 #     name: logstash
 #     state: stopped
+#   when: ls_state.stdout != "0" 
 
-- name: Uninstall ogstash
+- name: Uninstall logstash
   yum:
     name: logstash
     state: absent
+  when: ls_installed.stdout != "0"     
 
-- name: remove all ogstash file
+- name: remove all logstash file
   shell: "find / -name '*logstash*' | xargs rm -rf"
+  when: ls_installed.stdout != "0" 
 
 
   
@@ -26,6 +42,7 @@
   yum:
     name: logstash
     state: present
+
 
 - name: create certs path
   file:
@@ -35,12 +52,14 @@
     mode: 0755
     state: directory
 
+
 - name: create jvm.options with template
   template:
     src: jvm.options.j2
     dest: "{{ packagepath }}/jvm.options"
     force: yes
     mode: 0644
+
 
 - name: create logstash.yml with template
   template:
@@ -51,6 +70,7 @@
     mode: 0644
     force: yes
 
+
 - name: cerate logstash.conf with template
   template:
     src: logstash.conf.j2
@@ -60,6 +80,7 @@
     mode: 0644
     force: yes
 
+
 - name: copy ca files
   copy:
     src: "{{ ca_file }}"
@@ -67,7 +88,8 @@
     owner: root
     group: root
     mode: 0600
-  
+
+
 - name: copy cert files
   copy:
     src: "{{ cert_file }}"
@@ -76,16 +98,17 @@
     group: root
     mode: 0644
 
+
 - name: enable logstash
   systemd:
     name: logstash
     enabled: yes
     daemon_reload: yes
 
+
 - name: started logstash
   # shell: "systemctl start logstash"
   systemd:
     name: logstash
     state: started
-    
 

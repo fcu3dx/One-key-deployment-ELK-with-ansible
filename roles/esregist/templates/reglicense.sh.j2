@@ -1,2 +1,2 @@
 #!/bin/sh
-/usr/bin/curl -XPUT 'http://elastic:lm7GvkPVz8Lel9cvy8aG@{{ network_host }}:9200/_xpack/license?acknowledge=true' -H "Content-Type: application/json" -d @license.json
+/usr/bin/curl -XPUT 'http://elastic:lm7GvkPVz8Lel9cvy8aG@{{ es_network_host }}:9200/_xpack/license?acknowledge=true' -H "Content-Type: application/json" -d @license.json

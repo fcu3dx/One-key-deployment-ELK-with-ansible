@@ -3,11 +3,30 @@
 #     name: expect
 #     state: absent
 
+- name: rpm -ql elasticsearch
+  shell: rpm -ql elasticsearch | grep -v not | wc -l 
+  register: es_installed
+- debug:
+    var: es_installed
+
+- name: rpm -ql expect
+  shell: rpm -ql expect | grep -v not | wc -l
+  register: es_expect
+- debug:
+    var: ex_expect
+
+- name: ps elasticsearch
+  shell: ps -ef | grep elasticsearch | grep -v grep | wc -l
+  register: es_state
+
+- debug:
+    var: es_state
+
 - name: Install expect
   yum:
     name: expect
     state: present
-
+  when: es_expect.stdout == "0"
 - name: copy shell file
   copy:
     src: "{{ item }}"
@@ -16,6 +35,7 @@
   loop:
     - gerespass.sh
     - license.json
+  when: es_state.stdout != "0"
 
 - name: create reg_license file with template
   template:
@@ -23,23 +43,24 @@
     dest: /root/reglicense.sh
     force: yes
     mode: 0755
+  when: es_state.stdout != "0"
 
 - name: exec shell
   shell: "/root/gerespass.sh"
   
 - name:  import license curl
   shell: "/root/reglicense.sh"
+  when: es_state.stdout != "0"
 
-
-# - name: delete file
-#   file:
-#     path: "/root/{{ item }}"
-#     state: absent
-#   loop:
-#     - gerespass.sh
-#     - license.json
-#     - reglicense.sh
-
+- name: delete file
+  file:
+    path: "/root/{{ item }}"
+    state: absent
+  loop:
+    - gerespass.sh
+    - license.json
+    - reglicense.sh
+  when: es_state.stdout != "0"
 
 
 

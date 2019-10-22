@@ -16,7 +16,7 @@
 #
 # Use a descriptive name for the node:
 #
-node.name: {{ node_name }}
+node.name: {{ ls_node_name }}
 #
 # If omitted the node name will default to the machine's host name
 #
@@ -187,7 +187,7 @@ path.data: /var/lib/logstash
 #
 # Bind address for the metrics REST endpoint
 #
-http.host: "{{ network_host }}"
+http.host: "{{ ls_network_host }}"
 #
 # Bind port for the metrics REST endpoint, this option also accept a range
 # (9600-9700) and logstash will pick up the first available ports.

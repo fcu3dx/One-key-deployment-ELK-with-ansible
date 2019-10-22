@@ -5,24 +5,42 @@
 - name: take off swap file
   shell: "sudo swapoff -a"
 
-- name: stop elasticsearch
-  systemd:
-    name: elasticsearch.service
-    state: stopped
+- name: rpm -ql elasticsearch
+  shell: rpm -ql elasticsearch | grep -v not | wc -l 
+  register: es_installed
+- debug:
+    var: es_installed
+
+- name: ps elasticsearch
+  shell: ps -ef | grep elasticsearch | grep -v grep | wc -l
+  register: es_state
+
+- debug:
+    var: es_state
+
+
+# - name: stop elasticsearch
+#   systemd:
+#     name: elasticsearch.service
+#     state: stopped
+#   when: es_state.stdout != "0" 
 
 - name: Uninstall elasticsearch
   yum:
     name: elasticsearch
     state: absent
+  when: es_installed.stdout != "0" 
 
 - name: remove all elasticsearch file
-  shell: "find / -name '*elasticsearch*' | xargs rm -rf"
+  shell: "find / -name '*elasticsearch*' | xargs rm -rf"    
+  when: es_installed.stdout != "0" 
 
 
 - name: Install elasticsearch
   yum:
     name: elasticsearch
     state: present
+
 
 - name: create new path
   file:
@@ -36,6 +54,7 @@
     - "{{ newlibpath }}"
     - "{{ databackpath }}"
 
+
 - name: create certs path
   file:
     path: "{{ certpath }}"
@@ -44,6 +63,7 @@
     mode: 0755
     state: directory
 
+
 - name: delete old path
   file:
     path: "{{ item }}"
@@ -51,6 +71,7 @@
   loop:
     - "{{ oldlogpath }}"
     - "{{ oldlibpath }}"
+
 
 - name: link new path to old path
   file:
@@ -64,12 +85,14 @@
     - ["{{ newlogpath }}", "{{ oldlogpath }}"]
     - ["{{ newlibpath }}", "{{ oldlibpath }}"]
 
+
 - name: create jvm.options with template
   template:
     src: jvm.options.j2
     dest: "{{ packagepath }}/jvm.options"
     force: yes
     mode: 0660
+ 
 
 - name: create elasticsearch.yml with template
   template:
@@ -80,6 +103,7 @@
     mode: 0660
     force: yes
 
+
 - name: copy ca files
   copy:
     src: "{{ ca_file }}"
@@ -87,7 +111,8 @@
     owner: root
     group: elasticsearch
     mode: 0600
-  
+
+
 - name: copy cert files
   copy:
     src: "{{ cert_file }}"
@@ -95,6 +120,7 @@
     owner: root
     group: elasticsearch
     mode: 0644
+
 
 - name: copy jar files
   copy:
@@ -105,11 +131,13 @@
     mode: 0644
     force: yes
 
+
 - name: enable elasticsearch
   systemd:
     name: elasticsearch
     enabled: yes
     daemon_reload: yes
+
 
 - name: started elasticsearch
   # systemd:
@@ -117,14 +145,4 @@
   #   state: started
 
   shell: "systemctl start elasticsearch"
-
-
-
-
-
-
-
-
-
-
 

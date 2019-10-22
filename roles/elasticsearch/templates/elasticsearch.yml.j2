@@ -8,7 +8,7 @@ cluster.name: {{ cluster_name }}
 #
 # Use a descriptive name for the node:
 #
-node.name: {{ node_name }}
+node.name: {{ es_node_name }}
 #
 # Add custom attributes to the node:
 #
@@ -44,7 +44,7 @@ path.repo: /data/backup/elasticsearch
 #
 # Set the bind address to a specific IP (IPv4 or IPv6):
 #
-network.host: {{ network_host }}
+network.host: {{ es_network_host }}
 #
 # Set a custom port for HTTP:
 #

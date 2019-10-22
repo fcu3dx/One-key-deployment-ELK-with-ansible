@@ -5,24 +5,49 @@
 - name: take off swap file
   shell: "sudo swapoff -a"
 
-- name: stop kibana
-  systemd:
-    name: kibana.service
-    state: stopped
+- name: rpm -ql kibana
+  shell: rpm -ql kibana | grep -v not |grep -v "未安装" | wc -l 
+  register: kib_installed
+- debug:
+    var: kib_installed
+
+- name: ps kibana
+  shell: ps -ef | grep kibana | grep -v grep | wc -l
+  register: kib_state
+
+- debug:
+    var: kib_state
+
+
+# - name: stop kibana
+#   systemd:
+#     name: kibana.service
+#     state: stopped
+#   when: kib_state.stdout != "0" 
 
 - name: Uninstall kibana
   yum:
     name: kibana
     state: absent
+  when: kib_installed.stdout != "0" 
 
 - name: remove all kibana file
   shell: "find / -name '*kibana*' | xargs rm -rf"
+  when: kib_installed.stdout != "0" 
+
+
+# - name: sleep
+#   wait_for:
+#     port: 5044
+#     state: started
+#     delay: 10
 
 
 - name: Install kibana
   yum:
     name: kibana
     state: present
+
 
 - name: create kibana.yml with template
   template:
@@ -33,14 +58,17 @@
     mode: 0644
     force: yes
 
+
 - name: enable kibana
   systemd:
     name: kibana
     enabled: yes
     daemon_reload: yes
 
+
 - name: started kibana
   # shell: "systemctl start kibana"
   systemd:
     name: kibana
     state: started
+
