@@ -32,15 +32,20 @@
   when: kib_installed.stdout != "0" 
 
 - name: remove all kibana file
-  shell: "find / -name '*kibana*' | xargs rm -rf"
+  # shell: "find / -name '*kibana*' | xargs rm -rf"
+  file:
+    path: "{{ item }}"
+    state: absent
+  loop:
+    - /etc/kibana
+    - /usr/share/kibana
   when: kib_installed.stdout != "0" 
 
-
-# - name: sleep
-#   wait_for:
-#     port: 5044
-#     state: started
-#     delay: 10
+- name: wait_for 9200
+  wait_for:
+    host: "{{ es_host }}"
+    port: 9200
+    delay: 10
 
 
 - name: Install kibana
@@ -71,4 +76,6 @@
   systemd:
     name: kibana
     state: started
+
+
 

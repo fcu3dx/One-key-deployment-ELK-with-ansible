@@ -36,7 +36,11 @@
   shell: "find / -name '*logstash*' | xargs rm -rf"
   when: ls_installed.stdout != "0" 
 
-
+- name: wait_for 9200
+  wait_for:
+    host: "{{ es_host }}"
+    port: 9200
+    delay: 10
   
 - name: Install logstash
   yum:

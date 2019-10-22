@@ -20,35 +20,38 @@
         name: kibana.service
         state: stopped
 
-# - hosts: es_servers
-#   remote_user: root
-#   vars:
-#     - cluster_name: gxsk-dt-elk
-#     - discovery_seed_hosts: '["10.9.1.91", "10.9.1.92", "10.9.1.93"]'
-#     - initial_master_nodes: '["gxsk_es_01", "gxsk_es_02", "gxsk_es_03"]'
+- hosts: es_servers
+  remote_user: root
+  vars:
+    - cluster_name: gxsk-dt-elk
+    - discovery_seed_hosts: '["10.9.1.91", "10.9.1.92", "10.9.1.93"]'
+    - initial_master_nodes: '["gxsk_es_01", "gxsk_es_02", "gxsk_es_03"]'
      
-#     - es_jvm_money: 11
-#   roles:
-#     - elasticsearch
+    - es_jvm_money: 11
+  roles:
+    - elasticsearch
 
-# - hosts: 10.9.1.91
-#   remote_user: root
-#   roles:
-#     - esregist
-
-# - hosts: kibana_servers
-#   remote_user: root
-#   vars:
-#     - elasticsearch_hosts: '["http://10.9.1.91:9200", "http://10.9.1.92:9200", "http://10.9.1.93:9200"]'
-#   roles:
-#     - kibana
+- hosts: 10.9.1.91
+  remote_user: root
+  roles:
+    - esregist
 
 
-# - hosts: ls_servers
-#   remote_user: root
-#   vars:
-#     - elasticsearch_hosts: '["http://10.9.1.91:9200", "http://10.9.1.92:9200", "http://10.9.1.93:9200"]'
-#     - ls_jvm_money: 11
-#   roles:
-#     - logstash 
+- hosts: ls_servers
+  remote_user: root
+  vars:
+    - elasticsearch_hosts: '["http://10.9.1.91:9200", "http://10.9.1.92:9200", "http://10.9.1.93:9200"]'
+    - ls_jvm_money: 11
+    - es_host: 10.9.1.91
+  roles:
+    - logstash 
+
+
+- hosts: kibana_servers
+  remote_user: root
+  vars:
+    - es_host: 10.9.1.91
+    - elasticsearch_hosts: '["http://10.9.1.91:9200", "http://10.9.1.92:9200", "http://10.9.1.93:9200"]'
+  roles:
+    - kibana
 
