@@ -36,6 +36,27 @@
   shell: "find / -name '*logstash*' | xargs rm -rf"
   when: ls_installed.stdout != "0" 
 
+- name: set elk6 repo
+  yum_repository:
+    name: elasticstack-6.x
+    description: Elasticsearch repository for 6.x packages
+    baseurl: https://mirrors.tuna.tsinghua.edu.cn/elasticstack/yum/elastic-6.x/
+    enabled: yes
+    gpgcheck: 0
+    file: elk
+  when: elk_version == "6.2.4"
+
+
+- name: set elk7 repo
+  yum_repository:
+    name: elasticstack-7.x
+    description: Elasticsearch repository for 7.x packages
+    baseurl: https://mirrors.tuna.tsinghua.edu.cn/elasticstack/yum/elastic-7.x/
+    enabled: yes
+    gpgcheck: 0
+    file: elk
+  when: elk_version == "7.4.0"
+
 - name: wait_for 9200
   wait_for:
     host: "{{ es_host }}"
@@ -44,9 +65,20 @@
   
 - name: Install logstash
   yum:
-    name: logstash
+    name: "logstash-{{ elk_version }}"
     state: present
 
+- name: download xpack
+  get_url:
+    url: "{{ xpackurl }}"
+    dest: /tmp
+    force: no
+    timeout: 30
+  when: elk_version == "6.2.4" 
+
+- name: install xpack
+  shell: "/usr/share/logstash/bin/logstash-plugin install file:/tmp/x-pack-6.2.4.zip"
+  when: elk_version == "6.2.4"  
 
 - name: create certs path
   file:
@@ -59,7 +91,7 @@
 
 - name: create jvm.options with template
   template:
-    src: jvm.options.j2
+    src: jvm.options-{{ elk_version }}.j2
     dest: "{{ packagepath }}/jvm.options"
     force: yes
     mode: 0644
@@ -67,13 +99,14 @@
 
 - name: create logstash.yml with template
   template:
-    src: logstash.yml.j2
+    src: logstash-{{ elk_version }}.yml.j2
     dest: "{{ packagepath }}/logstash.yml"
     owner: root
     group: root
     mode: 0644
     force: yes
 
+- 
 
 - name: cerate logstash.conf with template
   template:
@@ -116,3 +149,8 @@
     name: logstash
     state: started
 
+- name: When this step is completed, the logstash system installation is completed 
+  wait_for:
+    host: "{{ ls_network_host }}"
+    port: 5044
+    delay: 10

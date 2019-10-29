@@ -14,16 +14,9 @@
 - name: ps elasticsearch
   shell: ps -ef | grep elasticsearch | grep -v grep | wc -l
   register: es_state
-
-- debug:
+- debug: 
     var: es_state
 
-
-# - name: stop elasticsearch
-#   systemd:
-#     name: elasticsearch.service
-#     state: stopped
-#   when: es_state.stdout != "0" 
 
 - name: Uninstall elasticsearch
   yum:
@@ -35,12 +28,56 @@
   shell: "find / -name '*elasticsearch*' | xargs rm -rf"    
   when: es_installed.stdout != "0" 
 
+- name: remove elk repo
+  file: 
+    path: "{{ item }}"
+    state: absent
+  loop:
+    - /etc/yum.repos.d/elk.repo 
+
+
+- name: set elk6 repo
+  yum_repository:
+    name: elasticstack-6.x
+    description: Elasticsearch repository for 6.x packages
+    baseurl: https://mirrors.tuna.tsinghua.edu.cn/elasticstack/yum/elastic-6.x/
+    enabled: yes
+    gpgcheck: 0
+    file: elk
+  when: elk_version == "6.2.4"
+
+
+- name: set elk7 repo
+  yum_repository:
+    name: elasticstack-7.x
+    description: Elasticsearch repository for 7.x packages
+    baseurl: https://mirrors.tuna.tsinghua.edu.cn/elasticstack/yum/elastic-7.x/
+    enabled: yes
+    gpgcheck: 0
+    file: elk
+  when: elk_version == "7.4.0"
+
+
+- name: Install expect
+  yum:
+    name: expect
+    state: present
+  when: elk_version == "6.2.4"
 
 - name: Install elasticsearch
   yum:
-    name: elasticsearch
+    name: "elasticsearch-{{ elk_version }}"
     state: present
 
+- name: create new prent path
+  file:
+    path: "{{ item }}"
+    group: root
+    owner: root
+    mode: 0755
+  loop:
+    - /data/lib
+    - /data/log
 
 - name: create new path
   file:
@@ -88,15 +125,15 @@
 
 - name: create jvm.options with template
   template:
-    src: jvm.options.j2
+    src: "jvm.options-{{ elk_version }}.j2"
     dest: "{{ packagepath }}/jvm.options"
     force: yes
     mode: 0660
- 
 
+ 
 - name: create elasticsearch.yml with template
   template:
-    src: elasticsearch.yml.j2
+    src: "elasticsearch-{{ elk_version }}.yml.j2"
     dest: "{{ packagepath }}/elasticsearch.yml"
     owner: root
     group: elasticsearch
@@ -130,7 +167,27 @@
     group: root
     mode: 0644
     force: yes
+  when: elk_version == "7.4.0"
 
+- name: download xpack
+  get_url:
+    url: "{{ xpackurl }}"
+    dest: /tmp
+    force: no
+    timeout: 30
+  when: elk_version == "6.2.4" 
+
+- name: copy installed xpack shell
+  template:
+    src: install-xpack.sh
+    dest: /root/install-xpack.sh
+    mode: 0755
+    force: yes
+  when: elk_version == "6.2.4"
+
+- name: install xpack
+  shell: "/root/install-xpack.sh"
+  when: elk_version == "6.2.4"
 
 - name: enable elasticsearch
   systemd:
@@ -146,3 +203,8 @@
 
   shell: "systemctl start elasticsearch"
 
+- name: When this step is completed, the logstash system installation is completed 
+  wait_for:
+    host: "{{ es_network_host }}"
+    port: 9200
+    delay: 10

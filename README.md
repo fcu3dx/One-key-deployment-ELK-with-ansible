@@ -2,6 +2,10 @@
 
 Elastic Stack 包括 Elasticsearch、Kibana、Beats 和 Logstash（也称为 ELK Stack）。能够安全可靠地获取任何来源、任何格式的数据，然后实时地对数据进行搜索、分析和可视化。
 
+## 更新日志
+
+- 2019.10.29 更新软件安装为按版本安装，目前只支持固定版本 6.2.4 和 7.4.0
+
 ## 服务器规划
 
 总计使用5台服务器，主要部署 `Elasticsearch`、`Logstash`、`Kibana`,各种Beats是分别部署到应用服务器上的，用于向ELK发送数据。具体规划如下：
@@ -74,6 +78,12 @@ Elastic Stack 包括 Elasticsearch、Kibana、Beats 和 Logstash（也称为 ELK
 集群节点主要是**logstash**、**kibana** 配置文件中，连接 **elasticsearch** 使用，所以需要添加所有可能成为 **master** 节点的主机。
 hosts 后面的可以指定单台主机（IP）,也可以使用定义好的名称（集群）
 
+修改 **Install.sh** 预安装系统版本号： 目前支持 `6.2.4` 和 `7.4.0` 两个版本
+修改 **./roles/esregist/file** 目录下 `generatepsss-{{ version }}.sh` 文件中的密码为自己的密码，替换license.json为你自己的注册文件。
+修改 install.yml 文件中所有IP地址为你的对应服务器IP地址
+
+其它详信息请查看各组件的 **README.md** 文档
+
 ### 安装
 
 ```shell
@@ -83,4 +93,3 @@ ansible-playbook -i hosts install.yml
 等候安装就行了。
 
 ## 参考文章
-

@@ -41,6 +41,27 @@
     - /usr/share/kibana
   when: kib_installed.stdout != "0" 
 
+- name: set elk6 repo
+  yum_repository:
+    name: elasticstack-6.x
+    description: Elasticsearch repository for 6.x packages
+    baseurl: https://mirrors.tuna.tsinghua.edu.cn/elasticstack/yum/elastic-6.x/
+    enabled: yes
+    gpgcheck: 0
+    file: elk
+  when: elk_version == "6.2.4"
+
+
+- name: set elk7 repo
+  yum_repository:
+    name: elasticstack-7.x
+    description: Elasticsearch repository for 7.x packages
+    baseurl: https://mirrors.tuna.tsinghua.edu.cn/elasticstack/yum/elastic-7.x/
+    enabled: yes
+    gpgcheck: 0
+    file: elk
+  when: elk_version == "7.4.0"
+
 - name: wait_for 9200
   wait_for:
     host: "{{ es_host }}"
@@ -50,19 +71,31 @@
 
 - name: Install kibana
   yum:
-    name: kibana
+    name: "kibana-{{ elk_version }}"
     state: present
 
 
 - name: create kibana.yml with template
   template:
-    src: kibana.yml.j2
+    src: "kibana-{{ elk_version }}.yml.j2"
     dest: "{{ packagepath }}/kibana.yml"
     owner: root
     group: root
     mode: 0644
     force: yes
 
+- name: download xpack
+  get_url:
+    url: "{{ xpackurl }}"
+    dest: /tmp
+    force: no
+    timeout: 15
+
+
+- name : install xpack
+  shell: "/usr/share/kibana/bin/kibana-plugin install file:/tmp/x-pack-6.2.4.zip"
+  when: elk_version == "6.2.4"
+  
 
 - name: enable kibana
   systemd:
@@ -76,6 +109,13 @@
   systemd:
     name: kibana
     state: started
+
+- name: When this step is completed, the Kibana system installation is completed 
+  wait_for:
+    host: "{{ kib_network_host }}"
+    port: 5601
+    delay: 10
+   
 
 
 

@@ -23,16 +23,20 @@
 - hosts: es_servers
   remote_user: root
   vars:
+    - elk_version: 6.2.4
+    - xpackurl: http://mirror.huolicard.com/Package/x-pack-6.2.4.zip
     - cluster_name: gxsk-dt-elk
     - discovery_seed_hosts: '["10.9.1.91", "10.9.1.92", "10.9.1.93"]'
     - initial_master_nodes: '["gxsk_es_01", "gxsk_es_02", "gxsk_es_03"]'
-     
     - es_jvm_money: 11
   roles:
     - elasticsearch
 
 - hosts: 10.9.1.91
   remote_user: root
+  vars: 
+    - elk_version: 6.2.4
+    - es_host: 10.9.1.91
   roles:
     - esregist
 
@@ -40,6 +44,8 @@
 - hosts: ls_servers
   remote_user: root
   vars:
+    - elk_version: 6.2.4
+    - xpackurl: http://mirror.huolicard.com/Package/x-pack-6.2.4.zip
     - elasticsearch_hosts: '["http://10.9.1.91:9200", "http://10.9.1.92:9200", "http://10.9.1.93:9200"]'
     - ls_jvm_money: 11
     - es_host: 10.9.1.91
@@ -50,8 +56,11 @@
 - hosts: kibana_servers
   remote_user: root
   vars:
-    - es_host: 10.9.1.91
+    - elk_version: 6.2.4
+    - xpackurl: http://mirror.huolicard.com/Package/x-pack-6.2.4.zip
+    - es_host: 10.9.1.92
     - elasticsearch_hosts: '["http://10.9.1.91:9200", "http://10.9.1.92:9200", "http://10.9.1.93:9200"]'
+    - elasticache_url: "http://10.9.1.92:9200"
   roles:
     - kibana
 
